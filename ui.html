@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Azilen LinkedIn OS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090f;color:#e2e8f0;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0d1117}::-webkit-scrollbar-thumb{background:#2d3748;border-radius:3px}
+.header{background:linear-gradient(135deg,#0a2558,#0d3275);padding:14px 28px;border-bottom:2px solid #00a3e0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hl{display:flex;align-items:center;gap:12px}.header h1{font-size:17px;font-weight:800;color:#fff}.header p{font-size:11px;color:#7bafd4;margin-top:2px}
+.badge{background:#00a3e0;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+.api-row{display:flex;align-items:center;gap:8px}
+.api-row input{background:#0a1628;border:1px solid #2a3f60;color:#e2e8f0;padding:7px 12px;border-radius:6px;font-size:13px;width:260px;outline:none}
+.api-row input:focus{border-color:#00a3e0}
+.api-row button{background:#00a3e0;color:#fff;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px}
+.api-status{font-size:11px;color:#5a7a9a}.api-status.ok{color:#00d4aa}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+.sidebar{width:210px;background:#0d1117;border-right:1px solid #1a2540;padding:18px 0;flex-shrink:0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.ns{padding:0 14px;margin-bottom:18px}.nl{font-size:10px;font-weight:700;color:#4a6080;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;padding:0 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;cursor:pointer;font-size:13px;color:#8badd4;transition:all .15s;margin-bottom:2px}
+.ni:hover{background:#131929;color:#e2e8f0}.ni.active{background:linear-gradient(135deg,#0a2558,#0d3a8e);color:#00a3e0;font-weight:600}
+.ni .ic{font-size:15px;width:18px;text-align:center}
+.main{flex:1;padding:24px;max-width:calc(100vw - 210px)}
+.page{display:none}.page.active{display:block}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:24px}
+.sc{background:#0d1117;border:1px solid #1a2540;border-radius:9px;padding:16px;text-align:center}
+.sc .v{font-size:24px;font-weight:800;color:#00a3e0}.sc .l{font-size:11px;color:#6a8aaa;margin-top:3px}.sc .s{font-size:10px;color:#3a5070;margin-top:2px}
+.sc.w .v{color:#ff6b35}.sc.g .v{color:#00d4aa}
+.panel{background:#0d1117;border:1px solid #1a2540;border-radius:9px;padding:22px;margin-bottom:18px}
+.pt{font-size:13px;font-weight:700;color:#8badd4;margin-bottom:14px}
+.stl{font-size:10px;font-weight:700;color:#4a6080;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fg label{font-size:12px;color:#6a8aaa;font-weight:500}
+.fg input,.fg select,.fg textarea{background:#07090f;border:1px solid #1a2540;color:#e2e8f0;padding:8px 11px;border-radius:7px;font-size:13px;outline:none;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#00a3e0}
+.fg textarea{resize:vertical;min-height:80px;line-height:1.5}
+.fr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.btn{padding:9px 20px;border-radius:7px;cursor:pointer;font-weight:700;font-size:13px;border:none;transition:all .2s}
+.bp{background:linear-gradient(135deg,#0a2558,#0d3a8e);color:#00a3e0;border:1px solid #00a3e0}
+.bp:hover{background:#00a3e0;color:#fff}.bp:disabled{opacity:.4;cursor:not-allowed}
+.bg{background:transparent;border:1px solid #2a3f60;color:#8badd4;padding:6px 13px;font-size:12px;border-radius:6px;cursor:pointer}
+.bg:hover{border-color:#00a3e0;color:#00a3e0}
+.out{background:#07090f;border:1px solid #1a2540;border-radius:8px;padding:18px;font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;line-height:1.7;color:#c8d8f0;white-space:pre-wrap;max-height:680px;overflow-y:auto;display:none;margin-top:14px}
+.out.show{display:block}
+.ii{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid #131929}.ii:last-child{border-bottom:none}
+.in{background:#00a3e0;color:#fff;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.it{font-size:13px;color:#b0c4de;line-height:1.55}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#0a1628;color:#6a8aaa;padding:9px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+td{padding:9px 11px;border-bottom:1px solid #131929;vertical-align:top}
+tr:hover td{background:#0d1117}
+.bf{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.fI{background:#0d3a1a;color:#00d4aa}.fT{background:#1a2d0a;color:#7ed957}.fC{background:#0a1f3a;color:#00a3e0}.fV{background:#2d1a0a;color:#ff6b35}
+.mc{background:#07090f;border:1px solid #1a2540;border-radius:8px;padding:14px;margin-bottom:11px}
+.mc .mm{font-size:11px;color:#4a6080;margin-bottom:5px}.mc .mt{font-size:13px;color:#b0c4de;line-height:1.5;margin-bottom:9px}
+.mc .ma{display:flex;gap:7px;flex-wrap:wrap}
+.mr{background:#0a1628;border:1px solid #1e3a5f;border-radius:6px;padding:11px;margin-top:9px;font-size:13px;color:#b0c4de;line-height:1.5;display:none}
+.mr.show{display:block}
+.sp{display:inline-block;width:12px;height:12px;border:2px solid #2a3f60;border-top-color:#00a3e0;border-radius:50%;animation:spin .7s linear infinite;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.em{text-align:center;padding:36px;color:#4a6080;font-size:13px}
+#toast{position:fixed;bottom:22px;right:22px;background:#00a3e0;color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;transform:translateY(100px);transition:transform .3s;z-index:999}
+#toast.show{transform:translateY(0)}
+.ph{color:#ff6b35;font-size:10px;font-weight:700}.pm{color:#f6ad55;font-size:10px;font-weight:700}
+.gm{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #131929}
+.gm:last-child{border-bottom:none}.gm .gn{font-size:13px;color:#b0c4de}.gm .gv{font-size:13px;font-weight:700;color:#00a3e0}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="hl">
+    <div><h1>⚡ Azilen LinkedIn OS</h1><p>Autonomous Growth · Brand Authority · Lead Generation</p></div>
+    <span class="badge">LIVE</span>
+  </div>
+  <div class="api-row">
+    <input type="password" id="apiKeyInput" placeholder="Paste OpenAI API key (sk-...)"/>
+    <button onclick="saveKey()">Save Key</button>
+    <span class="api-status" id="apiStatus">Key not set</span>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar">
+  <div class="ns">
+    <div class="nl">Overview</div>
+    <div class="ni active" onclick="go('dashboard',this)"><span class="ic">📊</span>Dashboard</div>
+    <div class="ni" onclick="go('calendar',this)"><span class="ic">📅</span>Content Calendar</div>
+  </div>
+  <div class="ns">
+    <div class="nl">Create</div>
+    <div class="ni" onclick="go('generate',this)"><span class="ic">✍️</span>Generate Post</div>
+    <div class="ni" onclick="go('report',this)"><span class="ic">🚀</span>Daily Report</div>
+    <div class="ni" onclick="go('monthly',this)"><span class="ic">📈</span>Monthly Analysis</div>
+  </div>
+  <div class="ns">
+    <div class="nl">Engage</div>
+    <div class="ni" onclick="go('mentions',this)"><span class="ic">🔔</span>Mention Tracker</div>
+    <div class="ni" onclick="go('comments',this)"><span class="ic">💬</span>Comment Manager</div>
+  </div>
+  <div class="ns">
+    <div class="nl">Grow</div>
+    <div class="ni" onclick="go('growth',this)"><span class="ic">🎯</span>Audience Growth</div>
+    <div class="ni" onclick="go('leads',this)"><span class="ic">💼</span>Lead Intelligence</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="stl">90-DAY PERFORMANCE DASHBOARD</div>
+  <div class="sg" id="statsGrid"><div class="sc"><div class="v">—</div><div class="l">Loading...</div></div></div>
+  <div class="panel"><div class="pt">🔍 Key Insights from Your Data</div><div id="insightsList"><div class="em">Loading...</div></div></div>
+  <div class="panel"><div class="pt">🏆 Top 5 Performing Posts</div><div id="topPostsTable"><div class="em">Loading...</div></div></div>
+</div>
+
+<!-- CALENDAR -->
+<div id="page-calendar" class="page">
+  <div class="stl">7-DAY CONTENT CALENDAR</div>
+  <div class="panel" style="overflow-x:auto"><div id="calendarTable"><div class="em">Loading...</div></div></div>
+  <div class="panel"><div class="pt">📋 Zoho Social Publishing Instructions</div><div id="zohoInstructions"></div></div>
+</div>
+
+<!-- GENERATE POST -->
+<div id="page-generate" class="page">
+  <div class="stl">GENERATE LINKEDIN POST</div>
+  <div class="panel">
+    <div class="fg"><label>Topic / Idea *</label><input type="text" id="postTopic" placeholder="e.g. Why 73% of Enterprise AI Projects Fail Before Production"/></div>
+    <div class="fr">
+      <div class="fg"><label>Content Pillar</label><select id="postPillar"><option>Agentic AI</option><option>Generative AI</option><option>Enterprise AI</option><option>Product Engineering</option><option>Digital Transformation</option><option>Data Engineering</option><option>Cloud Modernization</option><option>HRTech</option><option>Manufacturing Technology</option><option>FinTech Technology</option><option>Software Product Development</option><option>Leadership & Innovation</option></select></div>
+      <div class="fg"><label>Target Buyer</label><select id="postBuyer"><option>CTO</option><option>CIO</option><option>Chief Digital Officer</option><option>VP Engineering</option><option>VP Product</option><option>Head of AI</option><option>Head of Data</option><option>CHRO</option><option>Startup Founders</option><option>SaaS Founders</option></select></div>
+      <div class="fg"><label>Format</label><select id="postFormat"><option>TEXT</option><option>IMAGE</option><option>CAROUSEL</option><option>VIDEO</option></select></div>
+    </div>
+    <button class="btn bp" id="genPostBtn" onclick="generatePost()">Generate Post Variations →</button>
+    <div class="out" id="postOut"></div>
+  </div>
+</div>
+
+<!-- DAILY REPORT -->
+<div id="page-report" class="page">
+  <div class="stl">FULL 17-SECTION DAILY MARKETING REPORT</div>
+  <div class="panel">
+    <p style="font-size:13px;color:#6a8aaa;line-height:1.6;margin-bottom:14px">Complete daily operating report: competitor intelligence, trend analysis, content calendar, post variations, image prompts, carousel outline, video script, employee advocacy versions, lead generation recommendations. ~60 seconds.</p>
+    <div class="fg" style="max-width:480px"><label>Topic Override (leave blank = AI picks best topic today)</label><input type="text" id="reportTopic" placeholder="Leave blank for AI to choose..."/></div>
+    <button class="btn bp" id="genReportBtn" onclick="generateReport()">Generate Full Report →</button>
+    <div class="out" id="reportOut"></div>
+  </div>
+</div>
+
+<!-- MONTHLY -->
+<div id="page-monthly" class="page">
+  <div class="stl">MONTHLY PERFORMANCE ANALYSIS</div>
+  <div class="panel">
+    <p style="font-size:13px;color:#6a8aaa;line-height:1.6;margin-bottom:14px">Board-level monthly report: what worked, what didn't, competitor gaps, follower trajectory, lead generation results, next month strategy with KPI targets.</p>
+    <button class="btn bp" id="genMonthlyBtn" onclick="generateMonthly()">Generate Monthly Report →</button>
+    <div class="out" id="monthlyOut"></div>
+  </div>
+</div>
+
+<!-- MENTION TRACKER -->
+<div id="page-mentions" class="page">
+  <div class="stl">MENTION TRACKER</div>
+  <div class="panel">
+    <div class="pt">➕ Log a New Mention of Azilen</div>
+    <p style="font-size:12px;color:#6a8aaa;margin-bottom:14px">When someone mentions Azilen Technologies on LinkedIn — paste their post text here. AI will write the perfect response, decide if it's worth reposting, score the lead potential, and recommend next steps.</p>
+    <div class="fg"><label>Mention Text (paste from LinkedIn) *</label><textarea id="mentionText" placeholder="Paste the LinkedIn post or comment that mentions Azilen..."></textarea></div>
+    <div class="fr">
+      <div class="fg"><label>Person's Name</label><input type="text" id="mentionName" placeholder="e.g. John Smith"/></div>
+      <div class="fg"><label>Their Title / Company</label><input type="text" id="mentionTitle" placeholder="e.g. CTO at Acme Corp"/></div>
+      <div class="fg"><label>Mention Type</label><select id="mentionType"><option>Positive mention / praise</option><option>Question / inquiry</option><option>Criticism / complaint</option><option>Neutral reference</option><option>Partnership signal</option></select></div>
+    </div>
+    <button class="btn bp" id="analyzeMentionBtn" onclick="analyzeMention()">Analyze & Get Response Strategy →</button>
+    <div class="out" id="mentionOut"></div>
+  </div>
+  <div class="panel"><div class="pt">📋 Mention Log</div><div id="mentionLog"><div class="em">No mentions logged yet. Add one above.</div></div></div>
+</div>
+
+<!-- COMMENT MANAGER -->
+<div id="page-comments" class="page">
+  <div class="stl">COMMENT MANAGER</div>
+  <div class="panel">
+    <div class="pt">💬 Generate the Perfect Reply</div>
+    <p style="font-size:12px;color:#6a8aaa;margin-bottom:14px">Paste any comment from an Azilen LinkedIn post. Get the perfect reply, lead score, and recommended next action — in seconds.</p>
+    <div class="fg"><label>Your Original Post (optional but helps)</label><textarea id="origPost" placeholder="Paste your LinkedIn post text..."></textarea></div>
+    <div class="fg"><label>Comment to Reply to *</label><textarea id="commentText" placeholder="Paste the comment here..."></textarea></div>
+    <div class="fg" style="max-width:320px"><label>Commenter's Title / Company</label><input type="text" id="commenterTitle" placeholder="e.g. VP Engineering at Salesforce"/></div>
+    <button class="btn bp" id="genCommentBtn" onclick="generateCommentReply()">Generate Best Reply →</button>
+    <div class="out" id="commentOut"></div>
+  </div>
+</div>
+
+<!-- AUDIENCE GROWTH -->
+<div id="page-growth" class="page">
+  <div class="stl">AUDIENCE GROWTH ENGINE</div>
+  <div class="panel">
+    <div class="pt">🎯 30-Day Follower Growth Sprint</div>
+    <div class="sg" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+      <div class="sc"><div class="v" id="gf">—</div><div class="l">Current Followers</div></div>
+      <div class="sc g"><div class="v">110K</div><div class="l">30-Day Target</div></div>
+      <div class="sc w"><div class="v" id="gg">—</div><div class="l">Gap to Close</div></div>
+    </div>
+    <p style="font-size:13px;color:#6a8aaa;line-height:1.6;margin-bottom:14px">Get a personalised 30-day action plan: daily habits, viral content tactics, employee advocacy system, and follower growth levers ranked by impact.</p>
+    <button class="btn bp" id="genGrowthBtn" onclick="generateGrowth()">Generate 30-Day Growth Plan →</button>
+    <div class="out" id="growthOut"></div>
+  </div>
+</div>
+
+<!-- LEAD INTELLIGENCE -->
+<div id="page-leads" class="page">
+  <div class="stl">LEAD INTELLIGENCE</div>
+  <div id="leadsContent"><div class="em">Loading...</div></div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+<div id="toast"></div>
+
+<script>
+let mentionLog = [];
+
+function saveKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k) return;
+  fetch('/set-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})})
+    .then(r=>r.json()).then(()=>{
+      document.getElementById('apiStatus').textContent='✓ Key saved';
+      document.getElementById('apiStatus').className='api-status ok';
+      toast('OpenAI key saved ✓');
+    });
+}
+
+function go(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function copyText(text) { navigator.clipboard.writeText(text).then(()=>toast('Copied ✓')); }
+
+async function loadAll() {
+  const r = await fetch('/api/analyze');
+  const data = await r.json();
+  const s = data.summary;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="sc g"><div class="v">${Number(s.latest_followers).toLocaleString()}</div><div class="l">Followers</div><div class="s">+${Number(s.follower_growth_90d).toLocaleString()} in 90d</div></div>
+    <div class="sc ${s.vs_benchmark==='BELOW'?'w':'g'}"><div class="v">${s.avg_engagement_rate_pct}</div><div class="l">Engagement Rate</div><div class="s">Benchmark: ${s.linkedin_benchmark_pct}</div></div>
+    <div class="sc"><div class="v">${Number(s.total_impressions_90d).toLocaleString()}</div><div class="l">Impressions (90d)</div><div class="s">${Number(s.avg_daily_impressions).toLocaleString()} avg/day</div></div>
+    <div class="sc ${s.posting_frequency_per_week<5?'w':'g'}"><div class="v">${s.posting_frequency_per_week}x</div><div class="l">Posts/Week</div><div class="s">Target: 7-10x/week</div></div>
+    <div class="sc ${s.impression_trend_30d_pct<0?'w':'g'}"><div class="v">${s.impression_trend_30d_pct>0?'+':''}${s.impression_trend_30d_pct}%</div><div class="l">30d Trend</div><div class="s">${s.impression_trend_30d_pct<0?'Declining ↓':'Growing ↑'}</div></div>
+    <div class="sc"><div class="v">${s.total_posts_90d}</div><div class="l">Posts Published</div><div class="s">${s.date_range_days}-day period</div></div>`;
+
+  document.getElementById('insightsList').innerHTML = data.insights.map((ins,i)=>
+    `<div class="ii"><div class="in">${i+1}</div><div class="it">${ins}</div></div>`).join('');
+
+  const tp = data.top_posts||[];
+  document.getElementById('topPostsTable').innerHTML = tp.length ? `<table>
+    <thead><tr><th>#</th><th>Date</th><th>Type</th><th>Likes</th><th>Shares</th><th>Engagement</th></tr></thead>
+    <tbody>${tp.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${(p['Time of post']||'').substring(0,11)}</td>
+    <td><span class="bf f${(p['Post Type']||'T')[0]}">${p['Post Type']}</span></td>
+    <td>${p.Likes}</td><td>${p.Shares}</td><td>${(parseFloat(p.engagement_rate||0)*100).toFixed(4)}%</td></tr>`).join('')}
+    </tbody></table>` : '<div class="em">No post data found.</div>';
+
+  if (document.getElementById('gf')) {
+    document.getElementById('gf').textContent = Number(s.latest_followers).toLocaleString();
+    document.getElementById('gg').textContent = '+' + (110000 - s.latest_followers).toLocaleString();
+  }
+
+  // Calendar
+  const cr = await fetch('/api/calendar');
+  const cd = await cr.json();
+  document.getElementById('calendarTable').innerHTML = `<table>
+    <thead><tr><th>Day</th><th>Date</th><th>Time IST</th><th>Content Pillar</th><th>Format</th><th>Goal</th><th>Priority</th></tr></thead>
+    <tbody>${cd.calendar.map(e=>`<tr>
+      <td><strong>${e.day}</strong></td><td>${e.date}</td><td>${e.time_ist}</td><td>${e.content_pillar}</td>
+      <td><span class="bf f${e.format[0]}">${e.format}</span></td>
+      <td style="font-size:12px">${e.goal}</td>
+      <td><span class="${e.priority==='HIGH'?'ph':'pm'}">${e.priority}</span></td>
+    </tr>`).join('')}</tbody></table>`;
+  document.getElementById('zohoInstructions').innerHTML = cd.zoho_social_instructions
+    .map(i=>`<div style="font-size:13px;color:#8badd4;padding:6px 0;border-bottom:1px solid #131929">→ ${i}</div>`).join('');
+
+  // Leads
+  const lr = await fetch('/api/leads');
+  const ld = await lr.json();
+  document.getElementById('leadsContent').innerHTML = `
+    <div class="panel"><div class="pt">⚡ Immediate Actions (Do This Week)</div>
+    ${ld.immediate_actions.map(a=>`<div style="font-size:13px;color:#b0c4de;padding:7px 0;border-bottom:1px solid #131929">✓ ${a}</div>`).join('')}</div>
+    <div class="panel"><div class="pt">🎁 Lead Magnets to Build</div>
+    ${ld.quick_win_lead_magnets.map(m=>`<div style="padding:11px 0;border-bottom:1px solid #131929">
+      <div style="font-weight:700;font-size:13px;color:#00a3e0;margin-bottom:3px">${m.title}</div>
+      <div style="font-size:12px;color:#6a8aaa;margin-bottom:3px">${m.format} · ${m.target_buyer} · ${m.funnel_stage}</div>
+      <div style="font-size:12px;color:#8badd4">${m.cta_text}</div></div>`).join('')}</div>
+    <div class="panel"><div class="pt">🎯 Monthly Lead Targets</div>
+    ${Object.entries(ld.monthly_lead_target).filter(([k])=>k!=='note').map(([k,v])=>
+      `<div class="gm"><span class="gn">${k.replace(/_/g,' ').toUpperCase()}</span><span class="gv">${v}</span></div>`).join('')}
+    <div style="font-size:12px;color:#6a8aaa;margin-top:9px">${ld.monthly_lead_target.note}</div></div>`;
+}
+
+async function generatePost() {
+  const topic = document.getElementById('postTopic').value.trim();
+  if (!topic) { toast('Please enter a topic'); return; }
+  const btn=document.getElementById('genPostBtn'), out=document.getElementById('postOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Generating...';
+  out.className='out show'; out.textContent='Generating via GPT-4o... (~15 seconds)';
+  const r=await fetch('/api/generate-post',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({topic,pillar:document.getElementById('postPillar').value,
+      buyer:document.getElementById('postBuyer').value,format:document.getElementById('postFormat').value})});
+  const d=await r.json();
+  out.textContent=d.content||d.error;
+  if(d.content) out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('postOut').textContent)">Copy All</button>`);
+  btn.disabled=false; btn.textContent='Generate Post Variations →';
+}
+
+async function generateReport() {
+  const btn=document.getElementById('genReportBtn'), out=document.getElementById('reportOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Generating 17-section report...';
+  out.className='out show'; out.textContent='';
+  const resp=await fetch('/api/generate-report-stream',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({topic:document.getElementById('reportTopic').value.trim()||null})});
+  const reader=resp.body.getReader(), dec=new TextDecoder();
+  while(true){const{done,value}=await reader.read();if(done)break;out.textContent+=dec.decode(value);out.scrollTop=out.scrollHeight;}
+  out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('reportOut').textContent)">Copy Full Report</button>`);
+  btn.disabled=false; btn.textContent='Generate Full Report →';
+}
+
+async function generateMonthly() {
+  const btn=document.getElementById('genMonthlyBtn'), out=document.getElementById('monthlyOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Generating monthly analysis...';
+  out.className='out show'; out.textContent='Generating board-level monthly analysis... (~30 seconds)';
+  const r=await fetch('/api/generate-monthly',{method:'POST'});
+  const d=await r.json();
+  out.textContent=d.content||d.error;
+  if(d.content) out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('monthlyOut').textContent)">Copy Report</button>`);
+  btn.disabled=false; btn.textContent='Generate Monthly Report →';
+}
+
+async function analyzeMention() {
+  const text=document.getElementById('mentionText').value.trim();
+  if(!text){toast('Please paste the mention text');return;}
+  const btn=document.getElementById('analyzeMentionBtn'), out=document.getElementById('mentionOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Analyzing...';
+  out.className='out show'; out.textContent='Analyzing mention and generating response strategy...';
+  const r=await fetch('/api/analyze-mention',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text,name:document.getElementById('mentionName').value,
+      title:document.getElementById('mentionTitle').value,type:document.getElementById('mentionType').value})});
+  const d=await r.json();
+  out.textContent=d.content||d.error;
+  if(d.content){
+    out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('mentionOut').textContent)">Copy Strategy</button>`);
+    mentionLog.unshift({text:text.substring(0,120)+'...',name:document.getElementById('mentionName').value||'Unknown',
+      title:document.getElementById('mentionTitle').value,type:document.getElementById('mentionType').value,
+      date:new Date().toLocaleDateString(),response:d.content});
+    renderMentionLog();
+    document.getElementById('mentionText').value='';
+    document.getElementById('mentionName').value='';
+    document.getElementById('mentionTitle').value='';
+  }
+  btn.disabled=false; btn.textContent='Analyze & Get Response Strategy →';
+}
+
+function renderMentionLog() {
+  if(!mentionLog.length){document.getElementById('mentionLog').innerHTML='<div class="em">No mentions logged yet.</div>';return;}
+  document.getElementById('mentionLog').innerHTML=mentionLog.map((m,i)=>`
+    <div class="mc">
+      <div class="mm">${m.date} · ${m.name}${m.title?' · '+m.title:''} · ${m.type}</div>
+      <div class="mt">${m.text}</div>
+      <div class="ma">
+        <button class="bg" onclick="document.getElementById('mr${i}').classList.toggle('show')">View Strategy</button>
+        <button class="bg" onclick="copyText(mentionLog[${i}].response)">Copy Response</button>
+      </div>
+      <div class="mr" id="mr${i}">${m.response}</div>
+    </div>`).join('');
+}
+
+async function generateCommentReply() {
+  const comment=document.getElementById('commentText').value.trim();
+  if(!comment){toast('Please paste a comment');return;}
+  const btn=document.getElementById('genCommentBtn'), out=document.getElementById('commentOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Generating reply...';
+  out.className='out show'; out.textContent='Generating the perfect reply...';
+  const r=await fetch('/api/generate-comment-reply',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({post:document.getElementById('origPost').value,comment,title:document.getElementById('commenterTitle').value})});
+  const d=await r.json();
+  out.textContent=d.content||d.error;
+  if(d.content) out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('commentOut').textContent)">Copy Reply</button>`);
+  btn.disabled=false; btn.textContent='Generate Best Reply →';
+}
+
+async function generateGrowth() {
+  const btn=document.getElementById('genGrowthBtn'), out=document.getElementById('growthOut');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Building 30-day growth plan...';
+  out.className='out show'; out.textContent='Building your personalised 30-day audience growth sprint...';
+  const r=await fetch('/api/generate-growth-plan',{method:'POST'});
+  const d=await r.json();
+  out.textContent=d.content||d.error;
+  if(d.content) out.insertAdjacentHTML('beforeend',`<br><button class="bg" onclick="copyText(document.getElementById('growthOut').textContent)">Copy Plan</button>`);
+  btn.disabled=false; btn.textContent='Generate 30-Day Growth Plan →';
+}
+
+loadAll();
+</script>
+</body>
+</html>
