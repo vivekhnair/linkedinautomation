@@ -12,6 +12,8 @@ from engines.trend_monitor import get_current_trends
 from engines.competitor_analyzer import get_competitor_insights
 from engines.scheduler import generate_content_calendar
 from engines.lead_engine import get_lead_recommendations
+
+MODEL = "gpt-4o-mini"
 app = Flask(__name__)
 HTML = open(Path(__file__).parent / 'ui.html').read()
 
@@ -44,7 +46,7 @@ def api_generate_post():
     try:
         return jsonify({'content': generate_post_only(topic=d['topic'], pillar=d.get('pillar','Agentic AI'), post_format=d.get('format','TEXT'), buyer_persona=d.get('buyer','CTO'))})
     except Exception as e:
-        return jsonify({'error': f'Error: {e}\n\nMake sure your OpenAI API key is saved.'})
+        return jsonify({'error': f'Error: {e}\n\nMake sure your OpenAI API key is set in Render environment variables.'})
 
 @app.route('/api/generate-report-stream', methods=['POST'])
 def api_generate_report_stream():
@@ -54,7 +56,7 @@ def api_generate_report_stream():
     topic = request.json.get('topic')
     api_key = os.environ.get('OPENAI_API_KEY', '')
     if not api_key:
-        return Response(stream_with_context(iter(['ERROR: OpenAI API key not set. Paste your key at the top and click Save Key.'])), mimetype='text/plain')
+        return Response(stream_with_context(iter(['ERROR: OPENAI_API_KEY not set. Add it in Render → Environment tab.'])), mimetype='text/plain')
     perf = analyze_performance()
     trends = get_current_trends()
     comp = get_competitor_insights()
@@ -70,11 +72,11 @@ PERFORMANCE: {s.get('latest_followers',0):,} followers | {s.get('total_posts_90d
 INSIGHTS: {chr(10).join(insights[:3])}
 TRENDS: {chr(10).join(f'- {s2}' for s2 in signals)}
 COMPETITOR GAPS: {chr(10).join(f'- {o["opportunity"]}' for o in opps)}
-Generate complete 17-Section LinkedIn Marketing Report. Brutally specific, data-driven.
+Generate complete 17-Section LinkedIn Marketing Report. Brutally specific, data-driven, enterprise-focused.
 SECTION 1: EXECUTIVE SUMMARY\nSECTION 2: COMPETITOR ANALYSIS\nSECTION 3: INDUSTRY TREND ANALYSIS\nSECTION 4: CONTENT OPPORTUNITIES (5 ideas)\nSECTION 5: 7-DAY CONTENT CALENDAR (Mon-Fri, IST times)\nSECTION 6: TODAY'S HIGHEST POTENTIAL POST (800+ chars, publish-ready)\nSECTION 7: POST CAPTION VARIATIONS (Long/Medium/Short + 5 headlines + 5 hooks + 5 CTAs)\nSECTION 8: HASHTAG STRATEGY\nSECTION 9: IMAGE GENERATION PROMPTS (DALL-E, Midjourney, Adobe Express)\nSECTION 10: CAROUSEL OUTLINE (8-10 slides)\nSECTION 11: VIDEO CONCEPT (30-60 sec)\nSECTION 12: EMPLOYEE ADVOCACY (CEO, CTO, VP Marketing, Sales Leader)\nSECTION 13: PUBLISHING RECOMMENDATION\nSECTION 14: EXPECTED PERFORMANCE\nSECTION 15: LEAD GENERATION RECOMMENDATIONS\nSECTION 16: OPTIMIZATION RECOMMENDATIONS (5 data-backed)\nSECTION 17: ACTIONS BEFORE NEXT POST"""
     client = OpenAI(api_key=api_key)
     def generate():
-        stream = client.chat.completions.create(model='gpt-4o', max_tokens=8000, stream=True,
+        stream = client.chat.completions.create(model=MODEL, max_tokens=8000, stream=True,
             messages=[{'role':'system','content':AZILEN_SYSTEM_PROMPT},{'role':'user','content':prompt}])
         for chunk in stream:
             text = chunk.choices[0].delta.content or ''
