@@ -542,9 +542,10 @@ SECTION 17: ACTIONS TO IMPLEMENT BEFORE NEXT POST
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     print("\n" + "═"*60)
     print("  Azilen LinkedIn Growth OS – Web Interface")
     print("═"*60)
-    print("  Open in browser: http://localhost:5000")
+    print(f"  Running on port {port}")
     print("═"*60 + "\n")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
